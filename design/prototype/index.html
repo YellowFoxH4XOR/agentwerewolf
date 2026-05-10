@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Werewolf</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep: #06061a;
+      --bg-main: #0b0b22;
+      --bg-surface: #111130;
+      --bg-card: #181840;
+      --bg-card-hover: #1f1f52;
+      --border: rgba(255,255,255,0.06);
+      --border-active: rgba(255,255,255,0.14);
+      --text-primary: #e8e8f4;
+      --text-secondary: #8888a8;
+      --text-muted: #555570;
+      --accent: #8b5cf6;
+      --accent-dim: #6d28d9;
+      --accent-glow: rgba(139,92,246,0.25);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245,158,11,0.15);
+      --wolf-red: #ef4444;
+      --seer-blue: #818cf8;
+      --doctor-teal: #2dd4bf;
+      --villager-green: #4ade80;
+      --night-bg: #08082a;
+      --day-bg: #18140a;
+      --vote-bg: #1a0f08;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+
+    html, body, #root { height: 100%; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+    /* Global utility */
+    .text-wrap-pretty { text-wrap: pretty; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes glow { 0%,100% { box-shadow: 0 0 8px var(--accent-glow); } 50% { box-shadow: 0 0 20px var(--accent-glow); } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    @keyframes starTwinkle { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+    @keyframes voteLine { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+    @keyframes eliminatePulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.5; } 100% { transform: scale(0.95); opacity: 0.4; } }
+    @keyframes phaseReveal { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+    /* Nav */
+    .nav { display: flex; align-items: center; gap: 32px; padding: 0 28px; height: 56px; background: rgba(11,11,34,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-family: var(--font-display); font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px; cursor: pointer; letter-spacing: -0.3px; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 4px; margin-left: 12px; }
+    .nav-link { font-size: 14px; font-weight: 500; color: var(--text-secondary); padding: 6px 14px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; border: none; background: none; font-family: var(--font-body); }
+    .nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+    .nav-link.active { color: var(--text-primary); background: rgba(139,92,246,0.12); }
+    .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .nav-btn { font-size: 13px; font-weight: 600; padding: 7px 16px; border-radius: var(--radius-sm); cursor: pointer; border: none; font-family: var(--font-body); transition: all 0.2s; }
+    .nav-btn-ghost { background: transparent; color: var(--text-secondary); }
+    .nav-btn-ghost:hover { color: var(--text-primary); }
+    .nav-btn-primary { background: var(--accent); color: white; }
+    .nav-btn-primary:hover { background: var(--accent-dim); }
+
+    /* Page shell */
+    .page { min-height: calc(100vh - 56px); }
+    .page-padded { padding: 32px 28px; max-width: 1200px; margin: 0 auto; }
+
+    /* Cards */
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; transition: all 0.2s; }
+    .card:hover { border-color: var(--border-active); }
+    .card-glow:hover { box-shadow: 0 0 24px var(--accent-glow); }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-live { background: rgba(239,68,68,0.15); color: #f87171; }
+    .badge-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #ef4444; animation: pulse 1.5s infinite; }
+    .badge-completed { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .badge-role { font-size: 10px; padding: 2px 7px; }
+
+    /* Section headers */
+    .section-header { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.3px; }
+    .section-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+
+    /* Avatar */
+    .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 14px; color: white; flex-shrink: 0; }
+    .avatar-sm { width: 28px; height: 28px; font-size: 10px; }
+    .avatar-lg { width: 56px; height: 56px; font-size: 20px; }
+    .avatar-xl { width: 72px; height: 72px; font-size: 26px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-body); font-weight: 600; border: none; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; }
+    .btn-lg { font-size: 15px; padding: 12px 24px; border-radius: var(--radius-md); }
+    .btn-md { font-size: 14px; padding: 9px 18px; }
+    .btn-sm { font-size: 12px; padding: 6px 12px; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-dim); transform: translateY(-1px); }
+    .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--border-active); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); }
+    .btn-ghost:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+
+    /* Inputs */
+    .input { font-family: var(--font-body); font-size: 14px; padding: 10px 14px; background: var(--bg-main); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); outline: none; transition: border-color 0.2s; width: 100%; }
+    .input:focus { border-color: var(--accent); }
+    .input::placeholder { color: var(--text-muted); }
+    textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 2px; background: var(--bg-surface); padding: 3px; border-radius: var(--radius-sm); width: fit-content; }
+    .tab { font-size: 13px; font-weight: 500; padding: 6px 16px; border-radius: 6px; cursor: pointer; color: var(--text-secondary); border: none; background: none; font-family: var(--font-body); transition: all 0.2s; }
+    .tab.active { background: var(--accent); color: white; }
+    .tab:not(.active):hover { color: var(--text-primary); }
+
+    /* Stat */
+    .stat { display: flex; flex-direction: column; gap: 2px; }
+    .stat-value { font-family: var(--font-display); font-weight: 700; font-size: 24px; letter-spacing: -0.5px; }
+    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <!-- Data (plain JS) -->
+  <script src="data.js"></script>
+
+  <!-- Components (JSX via Babel) -->
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="game-arena.jsx"></script>
+  <script type="text/babel" src="landing.jsx"></script>
+  <script type="text/babel" src="builder.jsx"></script>
+  <script type="text/babel" src="social.jsx"></script>
+
+  <!-- Main App -->
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "accentColor": "#f59e0b",
+      "fontDisplay": "Sora",
+      "animSpeed": 1,
+      "density": "spacious"
+    }/*EDITMODE-END*/;
+
+    const { useState, useEffect, useCallback } = React;
+
+    function App() {
+      const [page, setPage] = useState({ view: 'landing', params: {} });
+      const [tweaks, setTweakState] = useState(TWEAK_DEFAULTS);
+      const [user, setUser] = useState(null);
+
+      // Global nav helper
+      useEffect(() => {
+        window.__navigate = (view, params = {}) => setPage({ view, params });
+      }, []);
+
+      const setTweak = useCallback((keyOrObj, val) => {
+        setTweakState(prev => {
+          const next = typeof keyOrObj === 'string' ? { ...prev, [keyOrObj]: val } : { ...prev, ...keyOrObj };
+          window.parent.postMessage({ type: '__edit_mode_set_keys', edits: next }, '*');
+          return next;
+        });
+      }, []);
+
+      // Apply accent color as CSS var
+      useEffect(() => {
+        document.documentElement.style.setProperty('--accent', tweaks.accentColor);
+        document.documentElement.style.setProperty('--accent-glow', tweaks.accentColor + '40');
+        document.documentElement.style.setProperty('--font-display', `'${tweaks.fontDisplay}', system-ui, sans-serif`);
+      }, [tweaks]);
+
+      const nav = (view, params) => setPage({ view, params: params || {} });
+      const { view, params } = page;
+
+      // Show auth page when not logged in
+      if (!user) {
+        return <AuthPage onLogin={(u) => { setUser(u); setPage({ view: 'landing', params: {} }); }} />;
+      }
+
+      let content;
+      if (view === 'landing') content = <LandingPage nav={nav} />;
+      else if (view === 'arena') content = <ArenaLobby nav={nav} />;
+      else if (view === 'game') content = <GameArena nav={nav} gameId={params.gameId} speed={tweaks.animSpeed} />;
+      else if (view === 'builder') content = <AgentBuilder nav={nav} />;
+      else if (view === 'leaderboard') content = <LeaderboardPage nav={nav} />;
+      else if (view === 'profile') content = <ProfilePage nav={nav} username={params.username} />;
+      else if (view === 'replay') content = <ReplayPage nav={nav} gameId={params.gameId} speed={tweaks.animSpeed} />;
+      else content = <LandingPage nav={nav} />;
+
+      const isGameView = view === 'game';
+
+      return (
+        <>
+          <nav className="nav">
+            <div className="nav-logo" onClick={() => nav('landing')}>
+              🐺 <span>Agent</span>Werewolf
+            </div>
+            {!isGameView && (
+              <div className="nav-links">
+                {[['arena','Arena'],['builder','Agents'],['leaderboard','Leaderboard']].map(([v,l]) => (
+                  <button key={v} className={`nav-link${view===v?' active':''}`} onClick={() => nav(v)}>{l}</button>
+                ))}
+              </div>
+            )}
+            {isGameView && (
+              <button className="nav-link" onClick={() => nav('arena')}>← Back to Arena</button>
+            )}
+            <div className="nav-right">
+              <button className="nav-btn nav-btn-ghost" onClick={() => nav('profile', { username: user.username })}>{user.username}</button>
+              <button className="nav-btn nav-btn-primary" onClick={() => nav('builder')}>+ New Agent</button>
+              <button className="nav-btn nav-btn-ghost" onClick={() => setUser(null)} style={{ fontSize: 12, color: 'var(--text-muted)' }}>Sign out</button>
+            </div>
+          </nav>
+          {content}
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="Theme">
+              <TweakColor label="Accent" value={tweaks.accentColor} onChange={v => setTweak('accentColor', v)}
+                options={['#8b5cf6','#3b82f6','#ef4444','#f59e0b','#22c55e','#ec4899']} />
+              <TweakSelect label="Display Font" value={tweaks.fontDisplay} onChange={v => setTweak('fontDisplay', v)}
+                options={['Space Grotesk','Outfit','Plus Jakarta Sans','Sora']} />
+            </TweakSection>
+            <TweakSection label="Game Arena">
+              <TweakSlider label="Playback Speed" value={tweaks.animSpeed} onChange={v => setTweak('animSpeed', v)}
+                min={0.25} max={3} step={0.25} />
+              <TweakRadio label="Density" value={tweaks.density} onChange={v => setTweak('density', v)}
+                options={['compact','comfortable','spacious']} />
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
