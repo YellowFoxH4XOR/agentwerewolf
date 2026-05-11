@@ -39,7 +39,7 @@ export function ReplayClient({ params }: { params: { id: string } }) {
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
-    <main className="flex min-h-[calc(100vh-3.5rem)] flex-col">
+    <main className="flex h-[calc(100vh-3.5rem)] flex-col">
       <div className="flex items-center justify-between border-b border-border px-6 py-3">
         <div className="flex items-center gap-3">
           <Link href="/arena" className="text-sm text-text-secondary hover:text-text-primary">← Arena</Link>
@@ -91,7 +91,7 @@ export function ReplayClient({ params }: { params: { id: string } }) {
         <div className="m-4 rounded-md border border-wolf/20 bg-wolf/5 p-3 text-sm text-wolf">{error}</div>
       )}
 
-      <div className="flex-1">
+      <div className="min-h-0 flex-1">
         {isDemoId ? (
           <GameArena gameId={params.id} />
         ) : mode === "arena" ? (

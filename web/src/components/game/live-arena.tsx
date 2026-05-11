@@ -92,7 +92,7 @@ export function LiveArena({ gameId }: { gameId: string }) {
 
   if (!snapshot) {
     return (
-      <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center bg-bg-deep text-text-muted">
+      <div className="flex h-full items-center justify-center bg-bg-deep text-text-muted">
         {error ? (
           <div className="text-center">
             <div className="mb-2 text-wolf">Couldn&apos;t connect to {gameId}.</div>
@@ -122,7 +122,7 @@ export function LiveArena({ gameId }: { gameId: string }) {
 
   return (
     <div
-      className="flex h-[calc(100vh-3.5rem)] flex-col transition-[background] duration-1000"
+      className="flex h-full min-h-0 flex-col transition-[background] duration-1000"
       style={{ background: phaseBg }}
     >
       <div className="flex items-center justify-between border-b border-border px-6 py-3">
@@ -142,10 +142,10 @@ export function LiveArena({ gameId }: { gameId: string }) {
       </div>
 
       <div className="flex min-h-0 flex-1">
-        <div className="relative flex flex-1 items-center justify-center">
-          <div className="relative h-[380px] w-[420px]">
+        <div className="relative flex flex-1 items-center justify-center p-6">
+          <div className="relative h-[480px] w-[560px]">
             {snapshot.players.map((p, i) => {
-              const pos = position(i, snapshot.players.length, 170, 150);
+              const pos = position(i, snapshot.players.length, 230, 200);
               const dead = !p.alive;
               const speaking = recentSpeaker === p.name;
               const color = COLORS[i % COLORS.length];
