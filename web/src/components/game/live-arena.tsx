@@ -42,7 +42,19 @@ const COLORS = [
 
 function position(index: number, total: number, rx: number, ry: number) {
   const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
-  return { x: rx * Math.cos(angle), y: ry * Math.sin(angle) };
+  // For odd seat counts, seat 0 sits at the top (sin = -1) but no seat
+  // reaches the bottom (sin maxes at cos(π/total) < 1). Shift every seat
+  // down by half the bbox asymmetry so the visual midline of all seats
+  // coincides with the container center — that's where the phase label
+  // is pinned, and the user reads "middle of all players" off the bbox.
+  let sMin = Infinity, sMax = -Infinity;
+  for (let k = 0; k < total; k++) {
+    const s = Math.sin((k / total) * 2 * Math.PI - Math.PI / 2);
+    if (s < sMin) sMin = s;
+    if (s > sMax) sMax = s;
+  }
+  const yShift = -ry * (sMin + sMax) / 2;
+  return { x: rx * Math.cos(angle), y: ry * Math.sin(angle) + yShift };
 }
 
 export function LiveArena({ gameId }: { gameId: string }) {
