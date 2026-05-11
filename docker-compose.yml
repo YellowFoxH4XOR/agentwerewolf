@@ -1,0 +1,23 @@
+services:
+  api:
+    build: ./api
+    ports: ["8000:8000"]
+    env_file: ./api/.env
+    environment:
+      - WEB_ORIGIN=http://localhost:3000
+    volumes:
+      - aw-data:/data
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    ports: ["3000:3000"]
+    env_file: ./web/.env.local
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  aw-data:
