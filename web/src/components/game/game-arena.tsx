@@ -291,16 +291,16 @@ export function GameArena({ gameId, speed = 1 }: GameArenaProps) {
 
       {/* Body */}
       <div className="flex min-h-0 flex-1">
-        <div className="relative flex flex-1 items-center justify-center">
-          <div className="relative h-[380px] w-[420px]">
+        <div className="relative flex flex-1 items-center justify-center p-6">
+          <div className="relative h-[480px] w-[560px]">
             {GAME_AGENTS.map((agent, i) => (
               <AgentSeat
                 key={agent.id}
                 agent={agent}
                 index={i}
                 total={GAME_AGENTS.length}
-                rx={170}
-                ry={150}
+                rx={230}
+                ry={200}
                 alive={!eliminated.has(agent.id)}
                 speaking={recentSpeaker === agent.id}
                 voted={agent.id in votes}
