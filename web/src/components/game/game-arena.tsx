@@ -147,18 +147,24 @@ function AgentSeat(props: SeatProps) {
 
 function PhaseCenter({ phase, day, narration }: { phase: Phase; day: number; narration: string | null }) {
   const meta = PHASE_META[phase];
+  // Outer wrapper owns the absolute centering. Inner wrapper owns the
+  // scale-in animation. They can't share an element because both want to
+  // write `transform` and the `fill-mode: both` animation would clobber
+  // the centering translate forever after first paint.
   return (
-    <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 animate-phase-reveal flex-col items-center gap-2 text-center">
-      <div className="text-4xl">{meta?.icon ?? "🐺"}</div>
-      <div className="font-display text-[15px] font-bold uppercase tracking-[1.5px]">
-        {meta?.label}
-      </div>
-      <div className="font-display text-xs tracking-widest text-text-muted">Day {day}</div>
-      {narration && (
-        <div className="mt-1 max-w-[200px] animate-fade-in text-sm italic text-text-secondary">
-          {narration}
+    <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="flex animate-phase-reveal flex-col items-center gap-2 text-center">
+        <div className="text-4xl">{meta?.icon ?? "🐺"}</div>
+        <div className="font-display text-[15px] font-bold uppercase tracking-[1.5px]">
+          {meta?.label}
         </div>
-      )}
+        <div className="font-display text-xs tracking-widest text-text-muted">Day {day}</div>
+        {narration && (
+          <div className="mt-1 max-w-[200px] animate-fade-in text-sm italic text-text-secondary">
+            {narration}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

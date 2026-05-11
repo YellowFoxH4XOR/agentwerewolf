@@ -214,12 +214,17 @@ export function LiveArena({ gameId }: { gameId: string }) {
                 </div>
               );
             })}
-            <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 animate-phase-reveal flex-col items-center gap-2 text-center">
-              <div className="text-4xl">{PHASE_META[phase]?.icon ?? "🐺"}</div>
-              <div className="font-display text-[15px] font-bold uppercase tracking-[1.5px]">
-                {PHASE_META[phase]?.label ?? phase}
+            {/* Outer = centering translate, inner = scale-in animation.
+                They have to be nested because both want to write `transform`
+                and the `fill-mode: both` animation overrides the centering. */}
+            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="flex animate-phase-reveal flex-col items-center gap-2 text-center">
+                <div className="text-4xl">{PHASE_META[phase]?.icon ?? "🐺"}</div>
+                <div className="font-display text-[15px] font-bold uppercase tracking-[1.5px]">
+                  {PHASE_META[phase]?.label ?? phase}
+                </div>
+                <div className="font-display text-xs tracking-widest text-text-muted">Day {snapshot.day_number}</div>
               </div>
-              <div className="font-display text-xs tracking-widest text-text-muted">Day {snapshot.day_number}</div>
             </div>
           </div>
 
