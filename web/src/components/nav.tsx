@@ -9,7 +9,6 @@ const links: { href: string; label: string }[] = [
   { href: "/arena", label: "Arena" },
   { href: "/builder", label: "Agents" },
   { href: "/leaderboards", label: "Leaderboard" },
-  { href: "/pricing", label: "Pricing" },
 ];
 
 export function Nav() {

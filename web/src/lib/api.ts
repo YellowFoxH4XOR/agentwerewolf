@@ -75,14 +75,6 @@ export async function getAgent(slug: string) {
   return api<AgentRead>(`/agents/${slug}`);
 }
 
-export interface BillingMe {
-  plan: string;
-  label: string;
-  max_agents: number;
-  agents_used: number;
-  credits_balance: number;
-}
-
 async function withAuth(init: RequestInit = {}, supabase: { auth: { getSession: () => Promise<{ data: { session: { access_token: string } | null } }> } }): Promise<RequestInit> {
   const { data: session } = await supabase.auth.getSession();
   const token = session.session?.access_token ?? "dev-user-token";
@@ -103,7 +95,6 @@ export interface UserBadge {
 
 export interface CreatorProfile {
   username: string;
-  plan: string;
   agents: number;
   total_games: number;
   total_wins: number;

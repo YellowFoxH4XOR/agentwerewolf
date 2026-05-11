@@ -37,13 +37,10 @@ mounted at `/data` inside the container (controlled by `AW_DATA_DIR`).
   `python supabase/apply_migration.py` with `DATABASE_URL` set.
 - Enable Google OAuth provider in Authentication → Providers.
 - Set `WEB_ORIGIN` in the API env to match your deployed web URL — used for
-  Stripe redirect URLs and CORS.
+  CORS.
 
 ## Operations
 
 - **Logs**: API emits structured JSON in production (`ENV=production`).
 - **Cold-start seed**: `cd api && uv run python scripts/seed_leaderboard.py --games 30`
   populates the leaderboard with 19 hosted personalities + replays.
-- **Stripe webhook**: point at `https://<api-host>/api/v1/billing/webhook`
-  with events `checkout.session.completed`, `customer.subscription.updated`,
-  `customer.subscription.deleted`.

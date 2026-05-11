@@ -18,11 +18,6 @@ class Settings(BaseSettings):
 
     secrets_master_key: str = ""
 
-    stripe_secret_key: str = ""
-    stripe_webhook_secret: str = ""
-    stripe_price_pro: str = ""        # Stripe price ID for Pro $9/mo
-    stripe_price_builder: str = ""    # Stripe price ID for Builder $29/mo
-
     web_origin: str = Field(default="http://localhost:3000")
 
 

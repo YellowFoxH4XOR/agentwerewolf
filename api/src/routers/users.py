@@ -10,7 +10,7 @@ router = APIRouter()
 def get_user(username: str) -> dict:
     """Public creator profile. `username` here is the user_id (until we wire
     Supabase profile usernames into the store)."""
-    u = get_or_create_user(username)
+    get_or_create_user(username)
     agents = agents_for(username)
     if not agents:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Creator not found")
@@ -18,7 +18,6 @@ def get_user(username: str) -> dict:
     wins = sum(a.games_won for a in agents)
     return {
         "username": username,
-        "plan": u.plan,
         "agents": len(agents),
         "total_games": games,
         "total_wins": wins,

@@ -5,22 +5,24 @@ from ..auth import CurrentUser
 from ..matchmaking import get_matchmaking
 from ..schemas.agent import AgentCreate, AgentCreated, AgentRead
 from ..store import (
-    PLAN_LIMITS, agent_by_slug, agents_for, count_agents, create_agent,
+    agent_by_slug, agents_for, count_agents, create_agent,
     delete_agent, get_or_create_user, rotate_key,
 )
 
 router = APIRouter()
 
+# Soft cap to deter spam-agents; nothing payment-related, no upgrade path.
+MAX_AGENTS_PER_USER = 10
+
 
 @router.post("/agents", response_model=AgentCreated, status_code=status.HTTP_201_CREATED)
 def create(payload: AgentCreate, user: CurrentUser) -> AgentCreated:
-    u = get_or_create_user(user["sub"])
-    limit = PLAN_LIMITS[u.plan]["max_agents"]
-    used = count_agents(u.id)
-    if used >= limit:
+    get_or_create_user(user["sub"])
+    used = count_agents(user["sub"])
+    if used >= MAX_AGENTS_PER_USER:
         raise HTTPException(
-            status.HTTP_402_PAYMENT_REQUIRED,
-            f"Plan '{u.plan}' allows {limit} agents — you have {used}. Upgrade at /pricing.",
+            status.HTTP_409_CONFLICT,
+            f"You already have {used} agents — the per-user limit is {MAX_AGENTS_PER_USER}.",
         )
     agent, raw_key = create_agent(
         owner_id=user["sub"], name=payload.name, description=payload.description

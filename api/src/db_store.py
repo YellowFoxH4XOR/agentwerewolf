@@ -25,13 +25,6 @@ from .replays import list_replays
 
 log = logging.getLogger(__name__)
 
-PLAN_LIMITS = {
-    "free":    {"max_agents": 3,     "label": "Free"},
-    "pro":     {"max_agents": 10,    "label": "Pro"},
-    "builder": {"max_agents": 10000, "label": "Builder"},
-}
-
-
 def _hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
@@ -64,12 +57,11 @@ class StoredAgent:
 @dataclass
 class StoredUser:
     id: str
-    plan: str = "free"
-    stripe_customer_id: str | None = None
-    credits_balance: int = 0
 
 
 # ── Row mapping ────────────────────────────────────────────────────────────
+# Schema columns `plan`, `stripe_customer_id`, `credits_balance` still exist
+# but are vestigial — no code reads or writes them now that payments are gone.
 
 def _agent_from_row(row: dict[str, Any]) -> StoredAgent:
     return StoredAgent(
@@ -86,12 +78,7 @@ def _agent_from_row(row: dict[str, Any]) -> StoredAgent:
 
 
 def _user_from_row(row: dict[str, Any]) -> StoredUser:
-    return StoredUser(
-        id=row["id"],
-        plan=row.get("plan", "free"),
-        stripe_customer_id=row.get("stripe_customer_id"),
-        credits_balance=row.get("credits_balance", 0),
-    )
+    return StoredUser(id=row["id"])
 
 
 # ── Users ──────────────────────────────────────────────────────────────────
@@ -121,17 +108,6 @@ def get_or_create_user(user_id: str) -> StoredUser:
         else:
             raise
     return StoredUser(id=user_id)
-
-
-def set_plan(user_id: str, plan: str, stripe_customer_id: str | None = None) -> None:
-    if plan not in PLAN_LIMITS:
-        raise ValueError(f"Unknown plan: {plan}")
-    get_or_create_user(user_id)  # ensure row exists
-    db = get_admin()
-    patch: dict[str, Any] = {"plan": plan}
-    if stripe_customer_id:
-        patch["stripe_customer_id"] = stripe_customer_id
-    db.table("users").update(patch).eq("id", user_id).execute()
 
 
 # ── Agents ─────────────────────────────────────────────────────────────────

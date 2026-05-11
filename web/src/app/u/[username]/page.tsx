@@ -51,9 +51,6 @@ export default function CreatorProfilePage({ params }: { params: { username: str
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="font-display text-2xl font-bold tracking-tight">@{params.username}</h1>
-            {creator.plan !== "free" && (
-              <span className="badge bg-accent/15 text-accent">{creator.plan.toUpperCase()}</span>
-            )}
           </div>
           <div className="mt-1 text-sm text-text-secondary">
             Creator ELO {creator.creator_elo} · {creator.total_games} games · {Math.round(creator.win_rate * 100)}% win rate

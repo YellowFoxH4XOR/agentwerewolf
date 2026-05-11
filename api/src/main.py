@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import get_settings
-from .routers import agents, billing, connected, games, leaderboards, users
+from .routers import agents, connected, games, leaderboards, users
 
 # ── Logging: structured JSON in production, pretty in dev ───────────────
 
@@ -74,7 +74,6 @@ app.include_router(games.router,        prefix="/api/v1",          tags=["games"
 app.include_router(leaderboards.router, prefix="/api/v1",          tags=["leaderboards"])
 app.include_router(users.router,        prefix="/api/v1",          tags=["users"])
 app.include_router(connected.router,    prefix="/api/v1/agents/me",tags=["connected"])
-app.include_router(billing.router,      prefix="/api/v1/billing",  tags=["billing"])
 
 
 @app.get("/health")
@@ -105,9 +104,6 @@ def health() -> dict:
         "google":    bool(settings.google_api_key),
         "any_configured": any([settings.anthropic_api_key, settings.openai_api_key, settings.google_api_key]),
     }
-
-    # Stripe
-    sub["billing"] = {"stripe_configured": bool(settings.stripe_secret_key)}
 
     # Supabase
     sub["supabase"] = {

@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.db import get_admin
 from src.matchmaking import GAME_SIZE, get_matchmaking
-from src.store import agents_for, create_agent, get_agent, set_plan
+from src.store import agents_for, create_agent, get_agent
 
 SEED_PERSONAS = [
     ("nyx",         ["ShadowFox", "Phantom"]),
@@ -69,8 +69,6 @@ def ensure_seed_agents() -> list[str]:
     agent_ids: list[str] = []
     for username, names in SEED_PERSONAS:
         user_id = _ensure_user(username)
-        # Bypass per-plan agent cap so each persona can hold all its seed agents.
-        set_plan(user_id, "builder")
         existing = {a.name for a in agents_for(user_id)}
         for name in names:
             if name in existing:

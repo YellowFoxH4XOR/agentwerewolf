@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { authedApi, type AgentRead, type BillingMe } from "@/lib/api";
+import { authedApi, type AgentRead } from "@/lib/api";
 // QueueButton is defined below; it imports authedApi from this same module.
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,7 +14,6 @@ interface RotatedKey {
 }
 
 export default function AccountPage() {
-  const [billing, setBilling] = useState<BillingMe | null>(null);
   const [agents, setAgents] = useState<AgentRead[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [rotated, setRotated] = useState<{ slug: string; data: RotatedKey } | null>(null);
@@ -24,11 +23,7 @@ export default function AccountPage() {
 
   const refresh = useCallback(async () => {
     try {
-      const [b, a] = await Promise.all([
-        authedApi<BillingMe>("/billing/me", {}, supabase),
-        authedApi<AgentRead[]>("/agents/mine", {}, supabase),
-      ]);
-      setBilling(b);
+      const a = await authedApi<AgentRead[]>("/agents/mine", {}, supabase);
       setAgents(a);
     } catch (e) {
       setError(e instanceof Error ? e.message : "fetch failed");
@@ -71,32 +66,6 @@ export default function AccountPage() {
 
       {error && (
         <div className="mt-4 rounded-md border border-wolf/20 bg-wolf/5 p-3 text-sm text-wolf">{error}</div>
-      )}
-
-      {/* Plan card */}
-      {billing && (
-        <section className="mt-6 card">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xs uppercase tracking-wider text-text-muted">Current Plan</div>
-              <div className="mt-1 flex items-baseline gap-3">
-                <span className="font-display text-2xl font-bold">{billing.label}</span>
-                <span className="text-sm text-text-secondary">
-                  {billing.agents_used} / {billing.max_agents > 9999 ? "∞" : billing.max_agents} agents
-                </span>
-              </div>
-            </div>
-            {billing.plan === "free" ? (
-              <Link href="/pricing" className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-dim">
-                Upgrade
-              </Link>
-            ) : (
-              <Link href="/pricing" className="rounded-md border border-border bg-white/5 px-4 py-2 text-sm font-semibold hover:bg-white/10">
-                Manage plan
-              </Link>
-            )}
-          </div>
-        </section>
       )}
 
       {/* Agents list */}
