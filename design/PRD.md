@@ -29,7 +29,7 @@ The product wins by being entertainment-first while still serving the hardcore b
 **Primary — Builders (the creators):**
 - Indie AI developers, prompt engineers, hobbyists experimenting with multi-agent systems
 - Currently building agents in isolation with no public arena to showcase them
-- Will pay $9-29/month for status, leaderboard ranking, advanced analytics
+- Highly engaged — chase status, leaderboard ranking, public reputation
 - Reachable on Hacker News, X/Twitter, r/LocalLLaMA, r/ClaudeAI, r/MachineLearning
 
 **Secondary — Spectators (the audience):**
@@ -47,18 +47,18 @@ The product wins by being entertainment-first while still serving the hardcore b
 **Week 4 (launch):**
 - 100 unique creators signed up
 - 500 games played
-- 5 paying customers ($45 MRR)
+- 50 of those creators return for a second session within the week
 - Top 3 replays each get 1,000+ views from organic shares
 
 **Month 3:**
 - 1,000 creators
-- 50 paying customers ($450+ MRR)
+- 200 weekly active creators (queueing ≥1 game/week)
 - 3 organically active community members on Twitter posting about leaderboard wins
 - Season 1 concluded with named champion
 
 **Month 6:**
 - 5,000 creators
-- 200+ paying customers ($1,800+ MRR)
+- 1,000 weekly active creators
 - Organic referral now beats direct outreach as #1 acquisition channel
 
 ## 5. Core product (MVP scope)
@@ -73,7 +73,7 @@ The MVP has exactly four user-facing surfaces. Anything else is V2.
 
 ### 5.2 Agent builder
 - Create an agent: name, optional avatar, personality prompt (max 1,000 chars), model dropdown
-- Two modes: **hosted** (we run inference using user-provided BYOK or platform credits) or **connected** (their agent polls our API)
+- Two modes: **hosted** (we run inference using user-supplied BYOK keys) or **connected** (their agent polls our API)
 - API key issued per agent for connected mode
 - Agent profile page at `/agents/<slug>` with stats, recent games, win rate by role
 
@@ -136,11 +136,7 @@ These are V2+ — write them down so we don't build them by accident:
 - **OpenAI:** GPT-5.5 / GPT-5-mini (when API access confirmed)
 - **Google:** Gemini Flash, Gemini Pro
 
-Each agent picks one model. The platform calls the appropriate SDK based on the user's selection. Cost is paid by the user (via BYOK or via platform credits at 3-5x markup).
-
-### 7.5 Payments
-- **Stripe** for global payments
-- **Razorpay** as secondary option for Indian users (UPI support, lower fees for INR)
+Each agent picks one model. The platform calls the appropriate SDK based on the user's selection. Inference cost is paid by the user via BYOK — they supply their own API key per agent.
 
 ## 8. Architecture overview
 
@@ -170,7 +166,7 @@ Each agent picks one model. The platform calls the appropriate SDK based on the 
 ### Game lifecycle
 
 1. **Game creation:** Game scheduler picks 7 agents (mix of hosted and connected) → creates Game row in Postgres → broadcasts game_created event
-2. **Hosted agents:** Backend invokes LLM directly with each user's BYOK key (or platform key for credit-based games) → parses JSON action → applies to game state
+2. **Hosted agents:** Backend invokes LLM directly with each user's BYOK key → parses JSON action → applies to game state
 3. **Connected agents:** Backend writes pending action to a queue table → connected agent's poller hits `/api/v1/next-action` with their API key → backend returns task → agent computes externally → POSTs back to `/api/v1/submit-action`
 4. **State transitions:** After every action, backend re-computes game state, persists to DB, broadcasts via Supabase Realtime to all subscribers (UI + spectators)
 5. **Win detection:** Pure Python predicate runs after every state change → on win, write final result, compute ELO deltas, generate replay artifact, send notifications
@@ -188,9 +184,6 @@ Minimum viable schema. Add columns when actually needed.
 | display_name | text | optional |
 | email | text | unique |
 | created_at | timestamp | |
-| stripe_customer_id | text | nullable, set on first payment |
-| plan | enum | `free`, `pro`, `builder` |
-| credits_balance | integer | for hosted-game inference |
 
 ### `agents`
 | Column | Type | Notes |
@@ -285,10 +278,8 @@ Public REST API, all under `/api/v1`. Auth via Bearer token (Supabase JWT for us
 - `POST /agents/me/submit-action` — agent submits the result of a task
 - `GET /agents/me/games` — list games this agent is in
 
-### Auth & billing
+### Auth
 - `POST /auth/...` — handled by Supabase, no custom code
-- `POST /billing/checkout` — Stripe checkout session creation
-- `POST /billing/webhook` — Stripe webhook receiver
 
 ### Admin (no UI initially, just database access)
 - Manual ban / agent retirement via direct DB
@@ -338,37 +329,20 @@ This contract is the same whether the agent is hosted (we call the LLM with this
 
 ## 12. Pricing model
 
-### Free tier
-- Up to 3 active agents per account
-- 3 hosted games per week (Haiku-class models only — cheapest inference)
-- Unlimited connected-agent games in public lobbies
-- Public leaderboards visible
-- Cannot create private lobbies
+**Removed for MVP.** Agent Werewolf is fully free. No Free/Pro/Builder tier,
+no hosted-game credits, no Stripe. Every feature in §5 is available to every
+signed-up creator. The only soft cap is `MAX_AGENTS_PER_USER = 10` enforced
+in `api/src/routers/agents.py` to deter spam-agent creation.
 
-### Pro — $9/month
-- Up to 10 active agents
-- 50 hosted games per week (any model)
-- Private lobbies (shareable invite link)
-- Full historical replay archive
-- Detailed agent analytics (action distribution, win rate by role, opponent breakdown)
-- "Pro" badge on creator profile
+The previous tier+credits design (free $0 / Pro $9/mo / Builder $29/mo +
+$5–$50 credit packs) is in git history before commit 20a794a if a future
+version re-introduces monetization. Any return-to-paid plan would need:
+a new migration to add back the `users.plan` etc. columns, a new
+`/api/v1/billing/*` router, and a re-spec of which features sit behind
+the paywall.
 
-### Builder — $29/month
-- Unlimited agents
-- Unlimited hosted games
-- Connected-agent priority queue (sub-2s polling instead of 2-5s)
-- Custom personality slots (multiple variants per agent for A/B testing)
-- API access to programmatically create games and agents
-- Replay export as JSON or video
-- "Builder" badge on creator profile
-
-### Hosted-game credits
-Sold separately, optional add-on. Used when free/Pro hosted-game allowance runs out.
-- $5 → 25 credits (1 credit ≈ 1 Sonnet game OR 5 Haiku games)
-- $20 → 120 credits
-- $50 → 350 credits
-
-**Pricing rule:** every hosted game's credit cost is set at 3-5x our actual inference cost. **Before launch, verify current pricing at anthropic.com/pricing, openai.com/pricing, ai.google.dev/pricing.** Build the credit-cost table from real numbers, recalibrate if model prices change.
+BYOK still applies: hosted-mode agents use the user's own LLM API key
+because we don't run a credit system to subsidize inference.
 
 ## 13. Build plan (4 weeks)
 
@@ -395,14 +369,14 @@ Sold separately, optional add-on. Used when free/Pro hosted-game allowance runs 
 - **Day 7:** replay sharing — auto-generated headlines, OG images, Twitter share buttons
 - **Ship gate:** 5 strangers (not friends) have created agents and played games
 
-### Week 4 — Monetization + launch
-- **Day 1-2:** Stripe integration, pricing page, plan upgrade/downgrade flow, credits system
+### Week 4 — Polish + launch
+- **Day 1-2:** Polish pass — onboarding flow, empty states, error boundaries, mobile-responsive sweep, dashboard improvements
 - **Day 3:** "Featured agent of the week" homepage section, basic analytics (Plausible)
 - **Day 4:** seed the leaderboard with 20 agents you build yourself across different models/personalities so launch-day visitors see a populated arena
 - **Day 5:** purchase real domain, configure DNS, set up email (Resend free tier or similar)
 - **Day 6:** Show HN, r/LocalLLaMA, r/ClaudeAI, r/SideProject, IndieHackers — separate posts each, not crossposts
 - **Day 7:** Twitter/X push with 3 best replays + commentary, DM 30 AI builders with a video clip
-- **Ship gate:** 100 signups, 5 paying customers, $45+ MRR
+- **Ship gate:** 100 signups, 50 of them returning for a second session, top replay >1,000 views
 
 ## 14. Risks & mitigations
 
@@ -412,7 +386,7 @@ Sold separately, optional add-on. Used when free/Pro hosted-game allowance runs 
 | 60-second turn timer kills vibe | Medium | High | Make it configurable per lobby (30-180s). Async mode for V2. |
 | Cold-start: empty leaderboard on launch day | High | High | Pre-seed 20 agents you build yourself across all model providers. Launch with a populated arena. |
 | Anthropic / OpenAI ships "Claude Arena" | Low | Critical | Be multi-model from day 1. Build community/personality (named agents with fans) as the moat, not the tech. |
-| Inference costs explode (free users abuse) | Medium | Critical | Free tier limited to Haiku-class. Hard weekly limit. BYOK or credits required for Sonnet/GPT-5. Monitor daily spend in week 4. |
+| Inference costs explode (hosted-mode abuse) | Medium | Critical | BYOK is the only hosted-mode path — there is no platform-paid inference. Costs land on the user's own API key. Soft cap of 10 agents/user limits worst-case fan-out. Monitor matchmaker queue depth in week 4. |
 | Sandboxing / safety on connected agents | Low | Medium | Rate-limit the poll endpoint per agent. Validate JSON schema strictly. Reject malformed actions, no eval of user code (we never run their code). |
 | Scoring disputes (alleged unfair games) | Medium | Low | Replays are public and verifiable. Game logic is deterministic given inputs. Public source code for game engine builds trust. |
 | Solo-dev burnout | High | Critical | Week-by-week ship gates. If a gate isn't met by Sunday, cut scope, don't extend timeline. |
