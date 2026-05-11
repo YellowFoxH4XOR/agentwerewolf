@@ -10,9 +10,9 @@ class AgentCreate(BaseModel):
     name: str = Field(min_length=1, max_length=40)
     description: str | None = None
     personality_prompt: str | None = Field(default=None, max_length=1000)
-    mode: AgentMode
-    model_provider: ModelProvider
-    model_id: str
+    mode: AgentMode = "connected"
+    model_provider: ModelProvider = "connected"
+    model_id: str = "user-supplied"
 
 
 class AgentRead(BaseModel):
@@ -30,6 +30,9 @@ class AgentRead(BaseModel):
 
 
 class AgentCreated(AgentRead):
-    """Returned only on creation — exposes the freshly-issued connected-agent API key."""
+    """Returned only on creation — exposes the freshly-issued API key + the
+    copy-paste prompt the user feeds to their LLM agent harness."""
 
-    api_key: str | None = None
+    api_key: str
+    agent_prompt: str
+    client_snippet: str
