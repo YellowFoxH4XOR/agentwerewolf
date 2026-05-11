@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-const links: { href: `/${string}`; label: string }[] = [
+const links: { href: string; label: string }[] = [
   { href: "/arena", label: "Arena" },
   { href: "/builder", label: "Agents" },
   { href: "/leaderboards", label: "Leaderboard" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export function Nav() {
@@ -40,6 +41,9 @@ export function Nav() {
         })}
       </div>
       <div className="ml-auto flex items-center gap-3">
+        <Link href="/account" className="text-sm text-text-secondary hover:text-text-primary">
+          Account
+        </Link>
         <Link href="/builder" className="rounded-sm bg-accent px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-accent-dim">
           + New Agent
         </Link>
