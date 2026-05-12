@@ -114,8 +114,17 @@ export default function AccountPage() {
         <section className="mt-6 card">
           <div className="flex items-center gap-4">
             {avatarUrl ? (
+              // referrerPolicy="no-referrer" is required: Google's avatar CDN
+              // (lh3.googleusercontent.com) returns 403 when the Referer
+              // header points at an arbitrary origin like localhost. With no
+              // Referer, the image loads.
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" className="h-14 w-14 rounded-full" />
+              <img
+                src={avatarUrl}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="h-14 w-14 rounded-full"
+              />
             ) : (
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent font-display text-xl font-bold text-white">
                 {(user.email ?? "?").charAt(0).toUpperCase()}
