@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 
 import { authedApi, type AgentRead } from "@/lib/api";
 // QueueButton is defined below; it imports authedApi from this same module.
@@ -14,12 +15,22 @@ interface RotatedKey {
 }
 
 export default function AccountPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [agents, setAgents] = useState<AgentRead[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [rotated, setRotated] = useState<{ slug: string; data: RotatedKey } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const supabase = createClient();
+  // Stable client across renders so useCallback deps don't churn.
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+      setAuthChecked(true);
+    });
+  }, [supabase]);
 
   const refresh = useCallback(async () => {
     try {
@@ -31,8 +42,8 @@ export default function AccountPage() {
   }, [supabase]);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (user) refresh();
+  }, [user, refresh]);
 
   const handleDelete = async (slug: string) => {
     if (!confirm(`Retire agent "${slug}"? This is permanent.`)) return;
@@ -60,12 +71,75 @@ export default function AccountPage() {
     }
   };
 
+  // Not signed in — surface a clear CTA instead of a blank screen.
+  if (authChecked && !user) {
+    return (
+      <main className="container max-w-[600px] py-12">
+        <div className="card text-center">
+          <div className="mb-3 text-4xl">🐺</div>
+          <h1 className="font-display text-xl font-bold tracking-tight">Sign in required</h1>
+          <p className="mt-2 text-sm text-text-secondary">
+            You need an account to manage agents and view your stats.
+          </p>
+          <Link
+            href="/auth"
+            className="mt-5 inline-block rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-dim"
+          >
+            Sign in
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const meta = user?.user_metadata ?? {};
+  const displayName = (meta.full_name as string | undefined) ?? (meta.name as string | undefined) ?? user?.email ?? "You";
+  const avatarUrl = meta.avatar_url as string | undefined;
+  const joined = user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: "short", year: "numeric" }) : "";
+  const totalGames = agents.reduce((acc, a) => acc + a.games_played, 0);
+  const totalWins = agents.reduce((acc, a) => acc + a.games_won, 0);
+
   return (
     <main className="container max-w-[800px] py-8">
       <h1 className="font-display text-2xl font-bold tracking-tight">Account</h1>
 
       {error && (
         <div className="mt-4 rounded-md border border-wolf/20 bg-wolf/5 p-3 text-sm text-wolf">{error}</div>
+      )}
+
+      {/* Profile card */}
+      {user && (
+        <section className="mt-6 card">
+          <div className="flex items-center gap-4">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="" className="h-14 w-14 rounded-full" />
+            ) : (
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent font-display text-xl font-bold text-white">
+                {(user.email ?? "?").charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1">
+              <div className="font-display text-lg font-bold">{displayName}</div>
+              <div className="text-sm text-text-secondary">{user.email}</div>
+              {joined && <div className="mt-0.5 text-xs text-text-muted">Joined {joined}</div>}
+            </div>
+            <div className="hidden gap-6 text-center sm:flex">
+              <div>
+                <div className="font-display text-lg font-bold">{agents.length}</div>
+                <div className="text-[10px] uppercase tracking-wider text-text-muted">Agents</div>
+              </div>
+              <div>
+                <div className="font-display text-lg font-bold">{totalGames}</div>
+                <div className="text-[10px] uppercase tracking-wider text-text-muted">Games</div>
+              </div>
+              <div>
+                <div className="font-display text-lg font-bold">{totalWins}</div>
+                <div className="text-[10px] uppercase tracking-wider text-text-muted">Wins</div>
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
       {/* Agents list */}
