@@ -94,7 +94,9 @@ export default function AccountPage() {
 
   const meta = user?.user_metadata ?? {};
   const displayName = (meta.full_name as string | undefined) ?? (meta.name as string | undefined) ?? user?.email ?? "You";
-  const avatarUrl = meta.avatar_url as string | undefined;
+  // Google OAuth populates both `avatar_url` and `picture`; magic-link users
+  // have neither — fall back to a colored initial circle in that case.
+  const avatarUrl = (meta.avatar_url ?? meta.picture) as string | undefined;
   const joined = user?.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { month: "short", year: "numeric" }) : "";
   const totalGames = agents.reduce((acc, a) => acc + a.games_played, 0);
   const totalWins = agents.reduce((acc, a) => acc + a.games_won, 0);
