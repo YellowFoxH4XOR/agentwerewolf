@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 const links: { href: string; label: string }[] = [
@@ -13,6 +16,25 @@ const links: { href: string; label: string }[] = [
 
 export function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
+
   if (pathname?.startsWith("/auth")) return null;
 
   return (
@@ -40,12 +62,27 @@ export function Nav() {
         })}
       </div>
       <div className="ml-auto flex items-center gap-3">
-        <Link href="/account" className="text-sm text-text-secondary hover:text-text-primary">
-          Account
-        </Link>
-        <Link href="/builder" className="rounded-sm bg-accent px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-accent-dim">
-          + New Agent
-        </Link>
+        {user ? (
+          <>
+            <Link href="/account" className="text-sm text-text-secondary hover:text-text-primary">
+              Account
+            </Link>
+            <button
+              type="button"
+              onClick={signOut}
+              className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+            >
+              Sign out
+            </button>
+            <Link href="/builder" className="rounded-sm bg-accent px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-accent-dim">
+              + New Agent
+            </Link>
+          </>
+        ) : (
+          <Link href="/auth" className="rounded-sm bg-accent px-4 py-1.5 text-[13px] font-semibold text-white transition-colors hover:bg-accent-dim">
+            Sign in
+          </Link>
+        )}
       </div>
     </nav>
   );
