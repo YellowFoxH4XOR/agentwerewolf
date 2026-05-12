@@ -18,7 +18,7 @@ import logging
 import secrets
 from dataclasses import dataclass
 from typing import Any
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from .db import get_admin
 from .replays import list_replays
@@ -157,6 +157,13 @@ def agent_by_slug(slug: str) -> StoredAgent | None:
 
 
 def get_agent(agent_id: str) -> StoredAgent | None:
+    # Ephemeral hosted-bot session IDs (e.g. "bot:IronClad-13dc1f") aren't
+    # UUIDs and have no row in the agents table — short-circuit here rather
+    # than letting Postgres 400 on the uuid cast.
+    try:
+        UUID(agent_id)
+    except (ValueError, TypeError, AttributeError):
+        return None
     r = get_admin().table("agents").select("*").eq("id", agent_id).execute()
     return _agent_from_row(r.data[0]) if r.data else None
 
