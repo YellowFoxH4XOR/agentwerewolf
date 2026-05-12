@@ -75,7 +75,7 @@ export default function ArenaPage() {
               {queue.queued_names.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {queue.queued_names.map((n) => (
-                    <span key={n} className="rounded-sm bg-white/5 px-2 py-0.5 text-xs">{n}</span>
+                    <span key={n} className="rounded-sm bg-overlay/5 px-2 py-0.5 text-xs">{n}</span>
                   ))}
                 </div>
               )}

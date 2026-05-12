@@ -87,7 +87,7 @@ export default function AgentProfilePage({ params }: { params: { slug: string } 
                   <span style={{ color: ROLE_COLORS[r] }}>{ROLE_ICONS[r]}</span>
                   <span className="capitalize">{r}</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-sm bg-white/[0.06]">
+                <div className="h-1.5 overflow-hidden rounded-sm bg-overlay/[0.06]">
                   <div className="h-full" style={{ width: `${pct}%`, background: ROLE_COLORS[r] }} />
                 </div>
                 <div className="mt-1.5 flex items-baseline justify-between text-xs text-text-muted">

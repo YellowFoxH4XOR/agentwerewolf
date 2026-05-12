@@ -197,7 +197,7 @@ export default function AccountPage() {
                     <button
                       onClick={() => handleRotate(a.slug)}
                       disabled={busy === a.slug}
-                      className="rounded-sm border border-border bg-white/5 px-3 py-1.5 text-xs hover:bg-white/10 disabled:opacity-50"
+                      className="rounded-sm border border-border bg-overlay/5 px-3 py-1.5 text-xs hover:bg-overlay/10 disabled:opacity-50"
                     >
                       Rotate key
                     </button>
@@ -232,7 +232,7 @@ export default function AccountPage() {
               </code>
               <button
                 onClick={() => navigator.clipboard?.writeText(rotated.data.api_key)}
-                className="rounded-sm border border-border bg-white/5 px-3 py-2 text-xs hover:bg-white/10"
+                className="rounded-sm border border-border bg-overlay/5 px-3 py-2 text-xs hover:bg-overlay/10"
               >
                 Copy key
               </button>

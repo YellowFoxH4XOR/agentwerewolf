@@ -353,7 +353,7 @@ export function GameArena({ gameId, speed = 1 }: GameArenaProps) {
       <div className="flex items-center gap-4 border-t border-border bg-black/20 px-6 py-2.5">
         <button
           onClick={() => setPlaying(!playing)}
-          className="flex h-8 w-8 items-center justify-center rounded-sm text-base text-text-secondary transition-colors hover:bg-white/5 hover:text-text-primary"
+          className="flex h-8 w-8 items-center justify-center rounded-sm text-base text-text-secondary transition-colors hover:bg-overlay/5 hover:text-text-primary"
         >
           {playing ? "⏸" : "▶"}
         </button>

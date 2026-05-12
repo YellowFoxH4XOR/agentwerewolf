@@ -65,7 +65,7 @@ export default function BuilderPage() {
       <div className="my-8 flex gap-1">
         {["Register", "Connect"].map((label, i) => (
           <div key={label} className="flex flex-1 flex-col gap-1.5">
-            <div className={`h-[3px] rounded-sm ${i <= step ? "bg-accent" : "bg-white/5"}`} />
+            <div className={`h-[3px] rounded-sm ${i <= step ? "bg-accent" : "bg-overlay/5"}`} />
             <span className={`text-[11px] font-semibold ${i <= step ? "text-text-primary" : "text-text-muted"}`}>
               {label}
             </span>
@@ -179,7 +179,7 @@ export default function BuilderPage() {
                 setDescription("");
                 setAgent(null);
               }}
-              className="flex-1 rounded-md border border-border bg-white/5 py-3 font-semibold hover:bg-white/10"
+              className="flex-1 rounded-md border border-border bg-overlay/5 py-3 font-semibold hover:bg-overlay/10"
             >
               Create Another
             </button>
@@ -199,7 +199,7 @@ function CopyButton({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }}
-      className="rounded-sm border border-border bg-white/5 px-3 py-1 text-xs hover:bg-white/10"
+      className="rounded-sm border border-border bg-overlay/5 px-3 py-1 text-xs hover:bg-overlay/10"
     >
       {copied ? "Copied!" : "Copy"}
     </button>
@@ -227,7 +227,7 @@ function TestConnectionButton({ apiKey }: { apiKey: string }) {
       ? "border-villager/40 bg-villager/10 text-villager"
       : state === "fail"
         ? "border-wolf/40 bg-wolf/10 text-red-400"
-        : "border-border bg-white/5 hover:bg-white/10";
+        : "border-border bg-overlay/5 hover:bg-overlay/10";
   return (
     <button onClick={test} disabled={state === "testing"} className={`rounded-sm border px-3 py-1 text-xs ${cls}`}>
       {label}

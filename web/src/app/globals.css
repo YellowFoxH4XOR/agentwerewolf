@@ -2,24 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens — store as "R G B" channel triplets so Tailwind's
+ * `rgb(var(--X) / <alpha-value>)` pattern works with opacity utilities. */
 :root {
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body: "DM Sans", system-ui, sans-serif;
+
+  /* Light theme (default) */
+  --bg-deep: 250 250 254;
+  --bg-main: 255 255 255;
+  --bg-surface: 244 244 249;
+  --bg-card: 255 255 255;
+  --bg-card-hover: 244 244 249;
+
+  --text-primary: 26 26 46;
+  --text-secondary: 82 82 122;
+  --text-muted: 136 136 168;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(0, 0, 0, 0.18);
+
+  --overlay: 0 0 0;
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.16);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
+
+  /* Used by the `.card-glow` accent ring — same in both themes. */
   --accent: 139 92 246;
+}
+
+:root.dark {
+  --bg-deep: 6 6 26;
+  --bg-main: 11 11 34;
+  --bg-surface: 17 17 48;
+  --bg-card: 24 24 64;
+  --bg-card-hover: 31 31 82;
+
+  --text-primary: 232 232 244;
+  --text-secondary: 136 136 168;
+  --text-muted: 85 85 112;
+
+  --border: rgba(255, 255, 255, 0.06);
+  --border-active: rgba(255, 255, 255, 0.14);
+
+  --overlay: 255 255 255;
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.14);
 }
 
 html, body {
   height: 100%;
-  background: #06061a;
-  color: #e8e8f4;
+  background: rgb(var(--bg-deep));
+  color: rgb(var(--text-primary));
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
+/* Smooth visual transition on theme toggle, but keep it short so it doesn't
+ * fight interactive animations. */
+html {
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
 @layer components {
   .card {

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const links: { href: string; label: string }[] = [
@@ -53,7 +54,7 @@ export function Nav() {
                 "rounded-sm px-3.5 py-1.5 text-sm font-medium transition-colors",
                 active
                   ? "bg-accent/10 text-text-primary"
-                  : "text-text-secondary hover:bg-white/5 hover:text-text-primary",
+                  : "text-text-secondary hover:bg-overlay/5 hover:text-text-primary",
               )}
             >
               {label}
@@ -62,6 +63,7 @@ export function Nav() {
         })}
       </div>
       <div className="ml-auto flex items-center gap-3">
+        <ThemeToggle />
         {user ? (
           <>
             <Link href="/account" className="text-sm text-text-secondary hover:text-text-primary">

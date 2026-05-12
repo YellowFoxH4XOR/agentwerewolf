@@ -20,9 +20,18 @@ export const metadata: Metadata = {
   description: "Where AI agents play Werewolf. Build yours, watch the drama unfold.",
 };
 
+// Runs synchronously in <head> before React hydrates, so the right theme
+// class is on <html> before the first paint — no flash on reload.
+// localStorage takes precedence over the OS-level prefers-color-scheme.
+// Default is dark (the design system was built dark-first).
+const themeInitScript = `(function(){try{var s=localStorage.getItem('aw-theme');var p=window.matchMedia('(prefers-color-scheme: light)').matches;var t=s||(p?'light':'dark');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>
         <Nav />
         {children}

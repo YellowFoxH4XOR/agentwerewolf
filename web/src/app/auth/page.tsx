@@ -77,7 +77,7 @@ export default function AuthPage() {
           <button
             onClick={sendMagicLink}
             disabled={loading || !email}
-            className="mt-3 w-full rounded-md border border-border bg-white/5 py-3 font-semibold transition-colors hover:bg-white/10 disabled:opacity-50"
+            className="mt-3 w-full rounded-md border border-border bg-overlay/5 py-3 font-semibold transition-colors hover:bg-overlay/10 disabled:opacity-50"
           >
             Send magic link
           </button>

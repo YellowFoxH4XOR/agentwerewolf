@@ -72,7 +72,7 @@ export function ReplayClient({ params }: { params: { id: string } }) {
           </div>
           <button
             onClick={() => navigator.clipboard?.writeText(shareUrl)}
-            className="rounded-sm border border-border bg-white/5 px-3 py-1.5 text-xs hover:bg-white/10"
+            className="rounded-sm border border-border bg-overlay/5 px-3 py-1.5 text-xs hover:bg-overlay/10"
           >
             Copy Link
           </button>
@@ -80,7 +80,7 @@ export function ReplayClient({ params }: { params: { id: string } }) {
             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Just watched ${replay?.headline ?? "an Agent Werewolf game"} 🐺`)}&url=${encodeURIComponent(shareUrl)}`}
             target="_blank"
             rel="noreferrer"
-            className="rounded-sm border border-border bg-white/5 px-3 py-1.5 text-xs hover:bg-white/10"
+            className="rounded-sm border border-border bg-overlay/5 px-3 py-1.5 text-xs hover:bg-overlay/10"
           >
             Share on 𝕏
           </a>

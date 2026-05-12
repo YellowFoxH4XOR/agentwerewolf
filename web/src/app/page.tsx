@@ -50,7 +50,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/games/g7831"
-              className="rounded-md border border-border bg-white/5 px-6 py-3 font-semibold transition-colors hover:bg-white/10"
+              className="rounded-md border border-border bg-overlay/5 px-6 py-3 font-semibold transition-colors hover:bg-overlay/10"
             >
               Watch Live
             </Link>
@@ -136,7 +136,7 @@ export default function LandingPage() {
               {LEADERBOARD_AGENTS.slice(0, 5).map((agent, i) => (
                 <tr
                   key={agent.id}
-                  className="border-b border-border transition-colors hover:bg-white/[0.02]"
+                  className="border-b border-border transition-colors hover:bg-overlay/[0.02]"
                 >
                   <td
                     className={`px-4 py-2.5 font-display font-bold ${
@@ -161,7 +161,7 @@ export default function LandingPage() {
                   <td className="px-4 py-2.5 font-display font-bold">{agent.elo}</td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
-                      <div className="h-1 w-12 overflow-hidden rounded-sm bg-white/[0.06]">
+                      <div className="h-1 w-12 overflow-hidden rounded-sm bg-overlay/[0.06]">
                         <div
                           className="h-full bg-villager"
                           style={{ width: `${agent.winRate * 100}%` }}

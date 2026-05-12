@@ -124,7 +124,7 @@ export default function LeaderboardsPage() {
                 {agents.map((agent, i) => (
                   <tr
                     key={agent.id}
-                    className="border-b border-border transition-colors hover:bg-white/[0.02]"
+                    className="border-b border-border transition-colors hover:bg-overlay/[0.02]"
                   >
                     <td className={cn("w-12 px-3.5 py-2.5 font-display font-bold", i < 3 ? "text-amber" : "text-text-muted")}>
                       {agent.rank}
@@ -150,7 +150,7 @@ export default function LeaderboardsPage() {
                     <td className="px-3.5 py-2.5 text-text-muted">{agent.gamesPlayed}</td>
                     <td className="px-3.5 py-2.5">
                       <div className="flex items-center gap-2">
-                        <div className="h-1 w-12 overflow-hidden rounded-sm bg-white/[0.06]">
+                        <div className="h-1 w-12 overflow-hidden rounded-sm bg-overlay/[0.06]">
                           <div
                             className="h-full"
                             style={{

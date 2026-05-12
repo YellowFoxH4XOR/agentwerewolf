@@ -115,7 +115,7 @@ export function ReplayLog({ replay }: { replay: Replay }) {
               {g.events.map((ev, ei) => {
                 if (ev.action === "system_announce") {
                   return (
-                    <div key={ei} className="rounded-sm bg-white/[0.03] px-3 py-2 text-center text-sm text-text-secondary">
+                    <div key={ei} className="rounded-sm bg-overlay/[0.03] px-3 py-2 text-center text-sm text-text-secondary">
                       {ev.content}
                     </div>
                   );
@@ -151,7 +151,7 @@ export function ReplayLog({ replay }: { replay: Replay }) {
                         <div className="mb-0.5 font-display text-xs font-semibold" style={{ color: c }}>
                           {ev.actor}
                         </div>
-                        <div className="rounded-[2px_12px_12px_12px] bg-white/[0.03] px-3 py-2 text-sm leading-relaxed">
+                        <div className="rounded-[2px_12px_12px_12px] bg-overlay/[0.03] px-3 py-2 text-sm leading-relaxed">
                           {ev.content}
                         </div>
                       </div>

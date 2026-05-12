@@ -1,6 +1,9 @@
 import type { Config } from "tailwindcss";
 
-// Palette mirrors design/prototype/index.html:root vars.
+// Theme-aware palette. Chrome colors (bg, text, border, overlay) flow through
+// CSS vars defined in globals.css and swap between :root (light) and :root.dark
+// (dark). Semantic game colors (night/day/vote bg, role colors) stay static —
+// they represent gameplay state and are recognized across themes.
 const config: Config = {
   darkMode: ["class"],
   content: ["./src/**/*.{ts,tsx}"],
@@ -8,21 +11,26 @@ const config: Config = {
     container: { center: true, padding: "1.75rem", screens: { "2xl": "1200px" } },
     extend: {
       colors: {
+        // App chrome — theme-aware via CSS vars. `<alpha-value>` lets `bg-bg-card/50`
+        // etc. still work; that's why the var holds "R G B" channels, not a full rgb().
         bg: {
-          deep:    "#06061a",
-          main:    "#0b0b22",
-          surface: "#111130",
-          card:    "#181840",
-          cardHover: "#1f1f52",
+          deep:      "rgb(var(--bg-deep) / <alpha-value>)",
+          main:      "rgb(var(--bg-main) / <alpha-value>)",
+          surface:   "rgb(var(--bg-surface) / <alpha-value>)",
+          card:      "rgb(var(--bg-card) / <alpha-value>)",
+          cardHover: "rgb(var(--bg-card-hover) / <alpha-value>)",
+          // Game-state semantics: kept static. "Night phase" should feel dark
+          // even when the user's app theme is light.
           night:   "#08082a",
           day:     "#18140a",
           vote:    "#1a0f08",
         },
         text: {
-          primary:   "#e8e8f4",
-          secondary: "#8888a8",
-          muted:     "#555570",
+          primary:   "rgb(var(--text-primary) / <alpha-value>)",
+          secondary: "rgb(var(--text-secondary) / <alpha-value>)",
+          muted:     "rgb(var(--text-muted) / <alpha-value>)",
         },
+        // Brand + role colors stay static across themes.
         accent: {
           DEFAULT: "#8b5cf6",
           dim:     "#6d28d9",
@@ -33,9 +41,13 @@ const config: Config = {
         doctor:   { DEFAULT: "#2dd4bf" },
         villager: { DEFAULT: "#4ade80" },
         border: {
-          DEFAULT: "rgba(255,255,255,0.06)",
-          active:  "rgba(255,255,255,0.14)",
+          // Already-baked alpha; no opacity-utility usage anywhere.
+          DEFAULT: "var(--border)",
+          active:  "var(--border-active)",
         },
+        // Semantic hover overlay: white-tinted in dark mode, black-tinted in light.
+        // Use `bg-overlay/5`, `hover:bg-overlay/10`, etc. — they invert automatically.
+        overlay: "rgb(var(--overlay) / <alpha-value>)",
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
